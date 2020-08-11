@@ -1,0 +1,184 @@
+.link{
+  fill: none;
+  opacity:1;
+  stroke-width: .3px;
+}
+.klink {
+  fill: none;
+  opacity:1;
+  stroke-width: .3px;
+}
+.node, .knode {
+  cursor: move;
+}
+.axis{
+  display:none;
+}
+.axis path,.axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+.axis text {
+  font-weight: 200;
+  font-family: "Helvetica Neue";
+  font-size: 8px;
+}
+.newlabel{
+  font-size: 12px;
+  color: gray;
+}
+.paperTitle{
+  font-size: 18px;
+  color:gray;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-weight: 200;
+  font-family: "Helvetica Neue";
+}
+.labels{
+  font-size: 10px;
+  text-transform:lowercase;
+  display:none;
+}
+.kandellabels{
+  font-size: 10px;
+  text-transform:lowercase;
+  display:none;
+}
+.line {
+}
+.button {
+  padding:4px;
+  background-color: white;
+  border: solid 1px lightgray;
+  cursor: pointer;
+  position: fixed;
+  font-family: Helvetica Neue;
+  font-size: 12px;
+  text-align: center;
+  font-weight: 200;
+  background-color: white;
+  color: #666;
+}
+.button:hover{
+  color: white;
+  border:1px solid yellow;
+  background-color: darkgray;
+}
+#citeRate.selected{
+  color: white;
+  border:1px solid yellow;
+  background-color: darkgray;
+}
+#focusKandel.selected{
+  color: white;
+  border:1px solid yellow;
+  background-color: darkgray;
+}
+#labelsOn.selected{
+  color: white;
+  border:1px solid yellow;
+  background-color: darkgray;
+}
+.button#citeRate {
+  position: absolute;
+  left: 50%;
+  margin-left: -44px;
+  top:2%;
+}
+.button#focusKandel {
+  position: absolute;
+  left: 50%;
+  margin-left:47px;
+  top:2%;
+}
+.button#labelsOn {
+  position: absolute;
+  left: 50%;
+  margin-left: -98px;
+  top:2%;
+}
+.button#reset {
+  top: 7%;
+  left: 50%;
+  margin-left: 10px;
+  display: none;
+  font-size: 14pt;
+  font-weight: 400;
+}
+body{
+  height: 800px;
+  overflow: auto;
+  letter-spacing: 1pt;
+  color:gray;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-weight: 200;
+  font-family: "Helvetica Neue";
+}
+#container{
+  z-index: 1;
+  left: 5%;
+  width: 100%;
+  height: 100%;
+  right:5%;
+}
+.button#key{
+  position:absolute;
+  left: 2%;
+  bottom: 2%;
+}
+.keyCirc, .newlabel, .paperCirc, .journoCirc, .descriplabel{
+  display:none;
+}
+.descriplabel{
+  position: fixed;
+  font-size: 12px;
+  display: none;
+  width: 15%;
+  height: 5%;
+  letter-spacing: 1 pt;
+  bottom: 22%;
+  left: 2%;
+}
+#titlename{
+  font-size: 18px;
+  display: none;
+  letter-spacing: 1 pt;
+  top: 13%;
+  position: absolute;
+  left:50%;
+  text-align: center;
+  margin-left:-159px;
+  background: white;
+}
+#titlename.selected{
+  font-size: 18px;
+  display: none;
+  letter-spacing: 1 pt;
+  top: 50px;
+  position: absolute;
+  left:187px;
+  text-align: left;
+  background: white;
+}
+.paperTitle.selected{
+  font-size: 18px;
+  display: none;
+  letter-spacing: 1 pt;
+  top: 2%;
+  position: absolute;
+  left:86%;
+  text-align: center;
+  margin-left:-159px;
+  background: white;
+}
+#header{
+  left: 2%;
+  top: 2%;
+  font-size: 18px;
+  border-style: none;
+  font-weight: 500;
+  position: absolute;
+}
