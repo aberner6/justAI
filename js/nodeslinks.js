@@ -60,8 +60,8 @@ var maxEntries;
 var citeNums = [];
 var radius = 3;
 //Width and height
-var w = window.outerWidth;
-var h = window.innerHeight - 50;
+var w = window.innerWidth - 100;
+var h = window.innerHeight - 100;
 var newCircle;
 
 var color; //=  d3.scale.category20c();
@@ -85,16 +85,16 @@ var itsDone = false;
 
 svg = d3.select("#container")
     .append("svg")
-    // .attr("width", w)
-    // .attr("height", h)
-    .attr({
-        "width": "100%",
-        "height": "100%",
-    })
+    .attr("width", w)
+    .attr("height", h)
+    // .attr({
+    //     "width": "100%",
+    //     "height": "100%",
+    // })
 var vis = svg //for the visualization
     .append('svg:g')
     .attr("transform",
-        "translate(" + 0 + "," + 0 + ")");
+        "translate(" + 50 + "," + 50 + ")");
 
 
 $("#key").click(function() {
@@ -142,7 +142,7 @@ var paperLabel = vis.selectAll("keylabel")
     .attr("y", startingYLabel - 18)
     .text("Colored Dot: Paper")
 
-loadData("../subsetGS2.csv", .1) //localllll
+loadData("../subsetGS2.csv", .9) //localllll
 
 function loadData(csvName, filterNum) {
     citeNums.length = 0;
@@ -517,7 +517,7 @@ function simpleNodes() {
         .links(links)
         .size([w, h])
         .linkDistance(20)
-        .charge(-200)
+        .charge(-50)
         .on("tick", tick)
         .start();
 
