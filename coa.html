@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Keyword Network</title>
+<link href="css/tipsy.css" rel="stylesheet" type="text/css" /> 
+
+<script type="text/javascript" src="js/lib/d3.min.js"></script>
+<script type="text/javascript" src="js/lib/jquery-2.1.1.min.js"></script>
+<script src="js/lib/jquery.tipsy.js"></script>
+<script type="text/javascript" src="js/lib/colorbrewer.js"></script>
+
+    <style type="text/css">
+
+        .link{
+            /*fill: rgb(226, 226, 226);*/
+            /*fill:lightblue;*/
+            fill: none;
+            opacity:1;
+            /*stroke: #666;*/
+            /*stroke-width: .3px;*/
+        }
+
+        .klink {
+            fill: none;
+            opacity:1;
+            stroke-width: .3px;
+        }
+
+        .node, .knode {
+            /*stroke-width:0.5px;*/
+            cursor: move;
+        }
+
+        /*.node.fixed {
+          stroke: #000;
+          stroke-width: .1px;
+        }*/
+
+        .axis{
+            display:none;
+        }
+
+        .axis path,.axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+        font-weight: 200;    
+            font-family: "Helvetica Neue";
+            font-size: 8px;
+        }
+
+        .newlabel{
+            font-size: 12px;
+            color: gray;
+        }
+
+        .paperTitle{
+            font-size: 18px;
+            color:gray;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;  
+            font-weight: 200;       
+            font-family: "Helvetica Neue";     
+        }
+
+        .labels{
+            font-size: 10px;
+            text-transform:lowercase;
+            /*display:none;*/
+        }
+
+        .kandellabels{
+            font-size: 10px;
+            text-transform:lowercase;
+            display:none;
+        }
+
+        .line {
+          /*fill: none;*/
+        }
+
+        #citeRate.selected{
+            color: white;
+            border:1px solid yellow; 
+                background-color: darkgray;
+            /*background-color: rgba(65, 63, 63, 1);  */
+        }
+        #focusKandel.selected{
+            color: white;
+            border:1px solid yellow; 
+                background-color: darkgray;
+            /*background-color: rgba(65, 63, 63, 1);  */
+        }
+        #labelsOn.selected{
+            color: white;
+            border:1px solid yellow; 
+                background-color: darkgray;
+            /*background-color: rgba(65, 63, 63, 1);  */
+        }
+
+        /***BUTTON CSS ***/
+
+        .button {
+            padding:4px;
+            background-color: white;
+            border: solid 1px lightgray;
+            cursor: pointer;
+            position: fixed;
+            /*border-style: 1px;*/
+            /*border-bottom-style: solid;*/
+            font-family: Helvetica Neue;
+            font-size: 12px;
+            text-align: center;
+            font-weight: 200;
+            background-color: white;
+            /*border-bottom: 1px solid rgba(170, 165, 165, 1);*/
+            color: #666;
+        }
+
+        .button:hover{
+            color: white;
+            border:1px solid yellow; 
+            background-color: darkgray;
+            /*background-color: rgba(65, 63, 63, 1);*/
+        }
+
+        .button#citeRate {
+            position: absolute;
+            left: 50%;
+            margin-left: -44px;
+            top:2%;
+        }
+
+        .button#focusKandel {
+            position: absolute;
+            left: 50%;
+            margin-left:47px;
+            top:2%;
+        }  
+
+        .button#labelsOn {
+            position: absolute;
+            left: 50%;
+            margin-left: -98px;
+            top:2%;
+
+        }
+
+        .button#reset {
+            top: 7%;
+            left: 50%;
+            margin-left: 10px;
+            display: none;
+            font-size: 14pt;
+            font-weight: 400;
+        }
+
+        .button#key{
+            position:absolute;
+        /*    left:7px;
+            top:35px;
+        */
+        left: 2%;
+        bottom: 2%;
+        }       
+
+
+        .button#year{
+            position:absolute;
+            left: 3%;
+            top: 10%;
+        }    
+
+        .button#medium{
+            position:absolute;
+            left: 7%;
+            top: 10%;
+        }        
+
+        .button#addedby{
+            position:absolute;
+            left: 13%;
+            top: 10%;
+        }        
+
+        .button#dateadded{
+            position:absolute;
+            left: 20%;
+            top: 10%;
+        }        
+
+
+        .keyCirc, .newlabel, .paperCirc, .journoCirc, .descriplabel{
+            /*display:none;*/
+        }
+        
+        .descriplabel{
+            position: fixed;
+            font-size: 12px;
+            display: none;
+            width: 15%;
+            height: 5%;
+            letter-spacing: 1 pt;
+            bottom: 22%;
+            left: 2%;
+        }
+
+
+        body{
+           height: 100%;    
+            overflow: auto;
+            letter-spacing: 1pt;
+            color:gray;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;  
+         font-weight: 200;       
+             font-family: "Helvetica Neue";      
+        }
+
+        #container{
+            z-index: 1;
+            left: 5%;
+            width: 100%;
+            height: 100%;
+            right:5%;
+        }
+
+        #header{
+            left: 1%;
+            top: 2%;
+            font-size: 18px;
+            border-style: none;
+            font-weight: 500;
+            position: absolute;
+        }
+
+
+        #titlename{
+            font-size: 12px;
+            display: none;
+            letter-spacing: 1 pt;
+            top: 13%;
+            position: absolute;
+            left:50%;
+            text-align: center;
+            /*margin-left:-159px;*/
+            /*margin-left: -109px;*/
+            background: white;
+
+            /*font-size: 12px;
+            display: none;
+            letter-spacing: 1 pt;
+            top:100px;*/
+        }
+
+        #subtitlename{
+            font-size: 14 px;
+            display: none;
+            letter-spacing: 1 pt;
+            top: 8%;
+            position: absolute;
+            left:18%;
+            text-align: center;
+            margin-left:-159px;
+            background: white;
+        }
+
+
+        #titlename.selected{
+            /*font-size: 18px;*/
+            display: none;
+            letter-spacing: 1 pt;
+            top: 50px;
+            position: absolute;
+            left:3%;
+            /*left:187px;*/
+            text-align: left;
+            /*margin-left:-159px;*/
+            background: white;
+        }
+
+        .paperTitle.selected{
+            font-size: 18px;
+            display: none;
+            letter-spacing: 1 pt;
+            top: 2%;
+            position: absolute;
+            left:86%;
+            text-align: center;
+            margin-left:-159px;
+            background: white;
+        }
+        
+    </style>
+</head>
+    
+    
+
+
+<body>
+    
+    <!-- /*** HEADINGS ***/ -->
+    <div id="header">RESEARCH NET</div>
+    <!-- <div id="subtitlename"> Sort by  <br>  </div> -->
+    
+    <!-- /*** BUTTONS ***/ -->
+<!--     <div class="button" id = "key">Key</div>
+    <div class="button" id = "year"> Year </div>
+    <div class="button" id = "medium"> Medium </div>   
+    <div class="button" id = "addedby"> Contributor </div>
+    <div class="button" id = "dateadded"> Date Added </div> -->
+    
+    <center>
+    <div class="button" id="reset"> RESET </div>
+    </center>
+
+    <!-- /*** KEY Description ***/ -->
+    <div class = "descriplabel">
+        <p>
+        This network is generated by keyword co-occurence: a physical simulation of charged particles and springs places related papers in closer proximity and connects them to their respective Major Keyword, while unrelated papers         are farther apart and not linked.
+        </p>
+    </div>
+    
+    <!-- /*** CONTAINER for nodes ***/ -->
+    <div id = "container"></div>
+
+<script type="text/javascript" src="js/authors.js"></script>
+
+</body>
+</html>
