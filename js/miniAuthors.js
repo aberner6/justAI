@@ -21,7 +21,7 @@ var path;
 
 var howLong = [];
 var rMap;
-var radius = 10;
+var radius = 5;
 var simulation;
 
 var dataset;
@@ -89,6 +89,11 @@ async function drawData() {
         }
     }
     if(mostKeyedDone==true){
+
+        rMap = d3.scaleLinear()
+            .domain([0, mostKeyed])
+            .range([radius, radius * 5]);
+
         for (i = 0; i<theseKeywords.length; i++){
             // console.log(totalKeywords[i]+theseKeywords[i]); 
             if(totalKeywords[i]>=mostKeyed*filterNum){ //if you have been mentioned more than once
@@ -119,19 +124,18 @@ async function drawData() {
 	        for (i=0; i<dataset.length; i++){ //for the whole dataset
 	            for (j=0; j<uniqueMostKeyed.length; j++){ //and the unique keywords
 	                if (keywords[i].indexOf(uniqueMostKeyed[j])!=-1){ //if a keyword in the dataset is the same as one of the unique keywords
-                        //NEED TO FIGURE OUT HOW TO ATTACH THE TOTALING MECHANISM 
-                        //TO THE FILTERED NODES
-                        //PROBLEM IS THAT THE KEYWORDS ARE IN SMALL ARRAYS NOT THE SAME AS THE TOTALKEYWORDS.LENGTH
-                        //(totalKeywords[i]+theseKeywords[i]); 
-                        
-                        links.push({"source":keywords[i],"target":uniqueMostKeyed[j],"title":dataset[i].title, "weight":totalKeywords[i]}) //set them as sources and targets  
-                        
+                        for (k=0; k<theseKeywords.length; k++){
+                            if (theseKeywords[k].indexOf(uniqueMostKeyed[j])!=-1){  
+                                links.push({"source":keywords[i],"target":uniqueMostKeyed[j],"title":dataset[i].title, "weight":totalKeywords[k]})  
+                            }
+                        }
 	                }
 	            }
 	        }
 	        simpleNodes();
 	    }
 	}
+
     function simpleNodes(){
         var thisWeight = [];
         var maxWeight;
@@ -139,7 +143,6 @@ async function drawData() {
         links.forEach(function(link) {
           link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, title:link.title});
           link.target = nodes[link.target] || (nodes[link.target] = {name: link.target, weight:link.weight});
-
         });
 
         simulation = d3.forceSimulation()
@@ -157,6 +160,7 @@ async function drawData() {
                 return "pink";
             })
             .attr("class", function(d){
+                // return d.weight;
                 return d.title;
             })
 
@@ -170,7 +174,8 @@ async function drawData() {
         circle
             .attr("r", function(d,i){
                 if(howLong[i][0].length==1){
-                    return radius*2;
+                    return rMap(d.weight);
+                    // return d.weight*10; //this will have to be scaled
                 }else{
                   return radius;  
                 }
@@ -196,7 +201,7 @@ async function drawData() {
                 }
             })
             .attr("stroke-width",2)
-            .on("mouseover", function(d) {
+            .on("mouseover", function(d,i) {
                 //get this circle's x/y values, then augment for the tooltip
                 var xPosition = d3.select(this).node().transform.baseVal[0].matrix.e + radius/2;
                 var yPosition = d3.select(this).node().transform.baseVal[0].matrix.f + radius/2;;
@@ -205,7 +210,14 @@ async function drawData() {
                     .style("left", xPosition + "px")
                     .style("top", yPosition + "px")                     
                     .select("#value")
-                    .text(d.name+d.weight);
+                    .text(function(){
+                        if(howLong[i][0].length>1){
+                            return d.title;
+                        }
+                        if(howLong[i][0].length==1){
+                            return d.name+d.weight;
+                        }
+                    });
                 //show the tooltip
                 d3.select("#tooltip").classed("hidden", false);
             })
