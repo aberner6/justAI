@@ -10,9 +10,20 @@ var uniqueKeywords;
 var mostKeyed;
 var uniqueMostKeyed;
 var uniqueTotalsKeyed;
+
+var journalTypes = [];
+var uniqueTypes;
+// for Key
+// var startingX = 20;
+// var startingY = 349; //523;
+// var startingXLabel = 34;
+// var startingYLabel = 351; //525;
+
+
 var links = [];
+var realLinks = [];
 var itsDone=false;
-var filterNum = .2;
+var filterNum = .5;
 var nodes = {};
 var svg;
 var vis;
@@ -23,26 +34,35 @@ var howLong = [];
 var rMap;
 var radius = 5;
 var simulation;
+var margin;
 
 var dataset;
 async function drawData() {
 /*step 1: get the data and see one piece of it*/	
-	dataset = await d3.csv("./data/coauthors6.csv");
+	dataset = await d3.csv("./data/justAIAB.csv");
 	const accessOnePiece = dataset[0];
-	console.log(dataset);
+	// console.log(dataset);
 
-/*step 2: basic dimensions, setting up canvas*/    
-    var width = 1200;//window.innerWidth*.99;
-    var height = 800;//window.innerHeight*.99;
+/*step 2: basic dimensions, setting up canvas*/  
+    var margin = radius*10;  
+    // var width = window.innerWidth-margin;
+    // var height = window.innerHeight-margin;
+    var width = window.outerWidth;
+    var height = window.innerHeight;
 
     svg = d3.select("#wrapper")
         .append("svg")
         .attr("width", width)
         .attr("height", height)
+
     vis = svg
         .append('svg:g')
-        .attr("transform","translate("+ 0 + "," + 0 + ")");  
+        .attr("transform","translate("+ 100 + "," + 0 + ")");  
+        // .attr("transform","translate("+ margin/2 + "," + margin/2 + ")");  
 
+    var key = svg //for the visualization
+        .append('svg:g')
+        .attr("transform", "translate(" + 0 + "," + 0 + ")");
 
 /*step 3: data processing, parsing, counting, creating relationships among the data pieces*/    
 /*probably don't need these*/
@@ -65,7 +85,16 @@ async function drawData() {
         for (j=0; j<keywords[i].length; j++){
             theseKeywords.push(keywords[i][j]);
         }
+        if (dataset[i].journal != "undefined" && dataset[i].journal.length != 0) {
+            journalTypes[i] = dataset[i].journal.toLowerCase();
+        }
     };
+
+
+    // //COLOR AND JOURNALS
+    uniqueTypes = journalTypes.filter(onlyUnique); //finds unique names onlyUnique is a function defined later
+    // // uniqueTypes = uniqueTypes.sort();
+
 
     keywordSorted = false;
     mostKeyedDone = false;
@@ -74,11 +103,10 @@ async function drawData() {
           theseKeywords.splice(i,1)
           i--;
         }
-        console.log(keywordSorted)
+        // console.log(keywordSorted)
         keywordSorted = true;
     }
     uniqueKeywords = theseKeywords.filter(onlyUnique); //find unique keywords
-
 
     //create a new array with the sums of all the different Keywords and also creates list of focus Keywords
     if(keywordSorted==true){
@@ -102,6 +130,7 @@ async function drawData() {
         } 
     }
     uniqueMostKeyed = focusKeywords.filter( onlyUnique ); //filter for duplicates
+
     //magic function to return only unique values
     function onlyUnique(value, index, self) {
         return self.indexOf(value) === index;
@@ -126,29 +155,56 @@ async function drawData() {
 	                if (keywords[i].indexOf(uniqueMostKeyed[j])!=-1){ //if a keyword in the dataset is the same as one of the unique keywords
                         for (k=0; k<theseKeywords.length; k++){
                             if (theseKeywords[k].indexOf(uniqueMostKeyed[j])!=-1){  
-                                links.push({"source":keywords[i],"target":uniqueMostKeyed[j],"title":dataset[i].title, "weight":totalKeywords[k]})  
+                                links.push({"source":keywords[i],"target":uniqueMostKeyed[j],"title":dataset[i].title, "weight":totalKeywords[k], "journal":dataset[i].journal})  
                             }
                         }
 	                }
 	            }
 	        }
-	        simpleNodes();
+	        makeLinks();
 	    }
 	}
+
+    function makeLinks(){
+        links.forEach(function(link) {
+          link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, title:link.title, journal:link.journal});
+          link.target = nodes[link.target] || (nodes[link.target] = {name: link.target, weight:link.weight, journal:link.journal});
+        });
+        simpleNodes();
+        // if(links[links.length-1].source.title!=undefined){
+        //     filterLinks();
+        // }
+    }
+
+    function filterLinks(){
+        for (var i = 0; i<links.length-1; i++){ 
+            if(links[i].source.title==links[i+1].source.title &&(links[i].source.name[0]==links[i+1].source.name[0])){ 
+            } 
+            else{ 
+                console.log("yes");
+                realLinks.push(links[i]) 
+            } 
+        }
+        realLinks.push(links[links.length-1])
+            simpleNodes();
+        // }
+    }
 
     function simpleNodes(){
         var thisWeight = [];
         var maxWeight;
 
-        links.forEach(function(link) {
-          link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, title:link.title});
-          link.target = nodes[link.target] || (nodes[link.target] = {name: link.target, weight:link.weight});
-        });
+
+    colorScalez = d3.scaleOrdinal()
+        .domain(uniqueTypes)
+        .range(["yellow", "blue", "green", "pink", "brown", "orange"])
+
 
         simulation = d3.forceSimulation()
             .nodes(d3.values(nodes))
             .force("link", d3.forceLink(links))
-            .force("charge", d3.forceManyBody().strength(-100))
+            .force("charge", d3.forceManyBody().strength(-10))
+            .force("collide", d3.forceCollide().radius(radius*5))
             .force("center", d3.forceCenter(width / 2, height / 2))
             .on("tick", ticked)
 
@@ -156,9 +212,9 @@ async function drawData() {
         path = vis.selectAll("path")
             .data(links)
             .enter().append("path")
-            .attr("fill", function(d){
-                return "pink";
-            })
+            .attr("fill","none")
+            .attr("stroke", "grey")
+            .attr("stroke-width",.1)
             .attr("class", function(d){
                 // return d.weight;
                 return d.title;
@@ -186,6 +242,7 @@ async function drawData() {
                         return "white";
                     }        
                     if(howLong[i][0].length>1){
+                        return colorScalez(d.journal)
                     } 
                 }
             })
@@ -194,7 +251,7 @@ async function drawData() {
             .attr("stroke", function(d,i){
                 if(howLong.length>0){    
                     if (howLong[i][0].length == 1) {
-                        return "blue";
+                        return "grey";
                     }else{
                         return "none";  
                     }
