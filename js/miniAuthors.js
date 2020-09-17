@@ -18,12 +18,12 @@ var uniqueTypes;
 // var startingY = 349; //523;
 // var startingXLabel = 34;
 // var startingYLabel = 351; //525;
-
+var colorScalez;
 
 var links = [];
-var realLinks = [];
+var moreLinks = [];
 var itsDone=false;
-var filterNum = .5;
+var filterNum = .2;
 var nodes = {};
 var svg;
 var vis;
@@ -94,7 +94,9 @@ async function drawData() {
     // //COLOR AND JOURNALS
     uniqueTypes = journalTypes.filter(onlyUnique); //finds unique names onlyUnique is a function defined later
     // // uniqueTypes = uniqueTypes.sort();
-
+    colorScalez = d3.scaleOrdinal()
+        .domain(uniqueTypes)
+        .range(["yellow", "blue", "green", "pink", "brown", "orange"])
 
     keywordSorted = false;
     mostKeyedDone = false;
@@ -165,40 +167,114 @@ async function drawData() {
 	    }
 	}
 
+    // moreLinks();
+    // function moreLinks(){
+    //     moreLinks = [];
+    //     if(itsDone==false){ //probably delete this check
+    //         for (i=0; i<dataset.length; i++){ //for the whole dataset
+    //             for (j=0; j<uniqueMostKeyed.length; j++){ //and the unique keywords
+    //                 if (keywords[i].indexOf(uniqueMostKeyed[j])!=-1){ //if a keyword in the dataset is the same as one of the unique keywords
+    //                     for (k=0; k<theseKeywords.length; k++){
+    //                         if (theseKeywords[k].indexOf(uniqueMostKeyed[j])!=-1){  
+    //                             moreLinks.push({"source":uniqueMostKeyed[j],"target": dataset[i].journal})  
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         makemoreLinks();
+    //     }
+    // }
+    // function makemoreLinks(){
+    //     moreLinks.forEach(function(link) {
+    //       link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
+    //       link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
+    //     });
+    //     moresimpleNodes();
+    // }
+
+
+
+    // function moresimpleNodes(){
+    //     // console.log(moreLinks);
+    //    simulation = d3.forceSimulation()
+    //         .nodes(d3.values(nodes))
+    //         .force("link", d3.forceLink(moreLinks))
+    //         .force("charge", d3.forceManyBody().strength(-10))
+    //         .force("collide", d3.forceCollide().radius(radius*5))
+    //         .force("center", d3.forceCenter(width / 2, height / 2))
+    //         .on("tick", ticked)
+
+
+    //     pathb = vis.selectAll("pathb")
+    //         .data(moreLinks)
+    //         .enter().append("path")
+    //         .attr("fill","none")
+    //         .attr("stroke", "grey")
+    //         .attr("stroke-width",.1)
+
+    //     circleb = vis.selectAll("nodeb")
+    //         .data(simulation.nodes())
+    //         .enter().append("circle")
+
+    //     circleb
+    //         .attr("r", 10)
+    //         .attr("fill", function(d,i){
+    //             return colorScalez(d.journal);
+    //         })
+    //         .attr("opacity", .2)
+    //         .on("mouseover", function(d,i) {
+    //             var xPosition = d3.select(this).node().transform.baseVal[0].matrix.e + radius/2;
+    //             var yPosition = d3.select(this).node().transform.baseVal[0].matrix.f + radius/2;;
+
+    //             d3.select("#tooltip")
+    //                 .style("left", xPosition + "px")
+    //                 .style("top", yPosition + "px")                     
+    //                 .select("#value")
+    //                 .text(function(){
+    //                     return d.journal;
+    //                 });
+    //             //show the tooltip
+    //             d3.select("#tooltip").classed("hidden", false);
+    //         })
+    //         .on("mouseout", function() {
+    //             //hide the tooltip
+    //             d3.select("#tooltip").classed("hidden", true); 
+    //         })
+
+    //     function ticked() {
+    //       pathb.attr("d", linkArc);
+    //       circleb.attr("transform", transform);
+    //     }
+    //     function transform(d) {
+    //       d.x = Math.max(radius, Math.min(width - radius, d.x));
+    //       d.y = Math.max(radius, Math.min(height - radius, d.y));   
+    //       return "translate(" + d.x+ "," + d.y + ")";
+    //     }
+    //     function linkArc(d) {
+    //       var dx = d.target.x - d.source.x,
+    //           dy = d.target.y - d.source.y,
+    //           dr = Math.sqrt(dx * dx + dy * dy);
+    //       return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+    //     }
+    // }
+
+
+
+
+
+
     function makeLinks(){
         links.forEach(function(link) {
           link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, title:link.title, journal:link.journal});
           link.target = nodes[link.target] || (nodes[link.target] = {name: link.target, weight:link.weight, journal:link.journal});
         });
         simpleNodes();
-        // if(links[links.length-1].source.title!=undefined){
-        //     filterLinks();
-        // }
-    }
-
-    function filterLinks(){
-        for (var i = 0; i<links.length-1; i++){ 
-            if(links[i].source.title==links[i+1].source.title &&(links[i].source.name[0]==links[i+1].source.name[0])){ 
-            } 
-            else{ 
-                console.log("yes");
-                realLinks.push(links[i]) 
-            } 
-        }
-        realLinks.push(links[links.length-1])
-            simpleNodes();
-        // }
     }
 
     function simpleNodes(){
         var thisWeight = [];
         var maxWeight;
-
-
-    colorScalez = d3.scaleOrdinal()
-        .domain(uniqueTypes)
-        .range(["yellow", "blue", "green", "pink", "brown", "orange"])
-
 
         simulation = d3.forceSimulation()
             .nodes(d3.values(nodes))
@@ -269,7 +345,7 @@ async function drawData() {
                     .select("#value")
                     .text(function(){
                         if(howLong[i][0].length>1){
-                            return d.title;
+                            return d.title+" "+d.journal;
                         }
                         if(howLong[i][0].length==1){
                             return d.name+d.weight;
