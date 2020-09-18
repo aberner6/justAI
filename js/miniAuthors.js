@@ -19,11 +19,12 @@ var uniqueTypes;
 // var startingXLabel = 34;
 // var startingYLabel = 351; //525;
 var colorScalez;
+var thisCount = 0;
 
 var links = [];
 var moreLinks = [];
 var itsDone=false;
-var filterNum = .2;
+var filterNum = .5;
 var nodes = {};
 var svg;
 var vis;
@@ -39,7 +40,7 @@ var margin;
 var dataset;
 async function drawData() {
 /*step 1: get the data and see one piece of it*/	
-	dataset = await d3.csv("./data/justAIAB.csv");
+	dataset = await d3.csv("./data/coau9.csv");
 	const accessOnePiece = dataset[0];
 	// console.log(dataset);
 
@@ -48,7 +49,7 @@ async function drawData() {
     // var width = window.innerWidth-margin;
     // var height = window.innerHeight-margin;
     var width = window.outerWidth;
-    var height = window.innerHeight;
+    var height = window.innerHeight-margin;
 
     svg = d3.select("#wrapper")
         .append("svg")
@@ -57,12 +58,12 @@ async function drawData() {
 
     vis = svg
         .append('svg:g')
-        .attr("transform","translate("+ 100 + "," + 0 + ")");  
+        .attr("transform","translate("+ 0 + "," + 0 + ")");  
         // .attr("transform","translate("+ margin/2 + "," + margin/2 + ")");  
 
-    var key = svg //for the visualization
-        .append('svg:g')
-        .attr("transform", "translate(" + 0 + "," + 0 + ")");
+    // var key = svg //for the visualization
+    //     .append('svg:g')
+    //     .attr("transform", "translate(" + 0 + "," + 0 + ")");
 
 /*step 3: data processing, parsing, counting, creating relationships among the data pieces*/    
 /*probably don't need these*/
@@ -96,7 +97,21 @@ async function drawData() {
     // // uniqueTypes = uniqueTypes.sort();
     colorScalez = d3.scaleOrdinal()
         .domain(uniqueTypes)
-        .range(["yellow", "blue", "green", "pink", "brown", "orange"])
+        .range(["#007dd2",
+"#bc2c00",
+"#7157df",
+"#00b44c",
+"#d40495",
+"#00bb8c",
+"#ff85af",
+"#3e6e00",
+"#eab1ff",
+"#bb7600",
+"#833570",
+"#f7bc5a",
+"#007357",
+"#ff876f",
+"#91341c"])
 
     keywordSorted = false;
     mostKeyedDone = false;
@@ -269,10 +284,10 @@ async function drawData() {
           link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, title:link.title, journal:link.journal});
           link.target = nodes[link.target] || (nodes[link.target] = {name: link.target, weight:link.weight, journal:link.journal});
         });
-        simpleNodes();
-    }
+    //     simpleNodes();
+    // }
 
-    function simpleNodes(){
+    // function simpleNodes(){
         var thisWeight = [];
         var maxWeight;
 
@@ -280,7 +295,7 @@ async function drawData() {
             .nodes(d3.values(nodes))
             .force("link", d3.forceLink(links))
             .force("charge", d3.forceManyBody().strength(-10))
-            .force("collide", d3.forceCollide().radius(radius*5))
+            // .force("collide", d3.forceCollide().radius(radius))
             .force("center", d3.forceCenter(width / 2, height / 2))
             .on("tick", ticked)
 
@@ -288,42 +303,55 @@ async function drawData() {
         path = vis.selectAll("path")
             .data(links)
             .enter().append("path")
-            .attr("fill","none")
+            .attr("fill", "none")
+            // .attr("opacity", .2)
             .attr("stroke", "grey")
-            .attr("stroke-width",.1)
-            .attr("class", function(d){
+            .attr("stroke-width",.2)
+            // .attr("class", function(d){
                 // return d.weight;
-                return d.title;
-            })
+                // return d.title;
+            // })
 
         circle = vis.selectAll("node")
             .data(simulation.nodes())
             .enter().append("circle")
             .attr("class", function(d){
                 howLong.push(d.name);
-                return d.name;
+                if(d.name[0].length==1){
+                    return d.name;
+                }  
             });
         circle
             .attr("r", function(d,i){
                 if(howLong[i][0].length==1){
                     return rMap(d.weight);
-                    // return d.weight*10; //this will have to be scaled
-                }else{
+                }
+                if(howLong[i].length==1){
+                    return radius; //SHOULD BE WITH WEIGHT
+                }
+                if(howLong[i][0].length>1){
                   return radius;  
                 }
             })
             .attr("fill", function(d,i){
                 if(howLong.length>0){
                     if(howLong[i][0].length==1){
+                        thisCount += 1;
                         return "white";
                     }        
-                    if(howLong[i][0].length>1){
+                    // if(howLong[i].length==1){ //PROBLEM WITH NODE COMPOSITION, HAS TO DO WITH THE WEIGHT ENTITY AS WELL
+                        //SINGLE AUTHORS SHOULD BE TREATED THE SAME AS MULTIPLE AUTHORS IN THE MAKING LINKS PART
+                        
+
+                    //     thisCount += 1;
+                    //     return "white";
+                    // }                 
+                    if(howLong[i].length>1&&howLong[i][0].length>1){
                         return colorScalez(d.journal)
                     } 
                 }
             })
-            .attr("opacity", function(d){
-            })
+            .attr("opacity", .8)
             .attr("stroke", function(d,i){
                 if(howLong.length>0){    
                     if (howLong[i][0].length == 1) {
@@ -333,7 +361,7 @@ async function drawData() {
                     }
                 }
             })
-            .attr("stroke-width",2)
+            .attr("stroke-width",1)
             .on("mouseover", function(d,i) {
                 //get this circle's x/y values, then augment for the tooltip
                 var xPosition = d3.select(this).node().transform.baseVal[0].matrix.e + radius/2;
@@ -364,10 +392,26 @@ async function drawData() {
           path.attr("d", linkArc);
           circle.attr("transform", transform);
         }
+
+        var blah = 0;
+        var angle = 0; 
         function transform(d) {
-          d.x = Math.max(radius, Math.min(width - radius, d.x));
-          d.y = Math.max(radius, Math.min(height - radius, d.y));   
-          return "translate(" + d.x+ "," + d.y + ")";
+            var thisOne = d;
+            //NEED TO GET RADIUSES ACCORDING TO MAPPED RADIUS
+            if (thisOne.name[0].length == 1) {
+                // console.log(thisOne);
+                blah++;
+                angle = (blah / (thisCount/2)) * Math.PI; // Calculate the angle at which the element will be placed.
+                d.x = (240 * Math.cos(angle)) + (width/2); // Calculate the x position of the element.
+                d.y = (200 * Math.sin(angle)) + (width/3);
+                return "translate(" + d.x + "," + d.y + ")";    
+                
+            }
+            else{
+                d.x = Math.max(radius, Math.min(width - radius, d.x));
+                d.y = Math.max(radius, Math.min(height - radius, d.y));
+                return "translate(" + d.x + "," + d.y + ")";            
+            }
         }
 
         function linkArc(d) {
