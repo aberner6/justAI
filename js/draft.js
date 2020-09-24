@@ -13,14 +13,18 @@ var uniqueTotalsKeyed;
 
 var journalTypes = [];
 var uniqueTypes;
-
+// for Key
+// var startingX = 20;
+// var startingY = 349; //523;
+// var startingXLabel = 34;
+// var startingYLabel = 351; //525;
 var colorScalez;
 var thisCount = 0;
 
 var links = [];
 var moreLinks = [];
 var itsDone=false;
-var filterNum = .1;
+var filterNum = .5;
 var nodes = {};
 var svg;
 var vis;
@@ -32,18 +36,18 @@ var rMap;
 var radius = 5;
 var simulation;
 var margin;
-var drag;
 
 var dataset;
 async function drawData() {
 /*step 1: get the data and see one piece of it*/	
-	dataset = await d3.csv("./data/justAIAB.csv");
+	dataset = await d3.csv("./data/coau9.csv");
 	const accessOnePiece = dataset[0];
 	// console.log(dataset);
 
 /*step 2: basic dimensions, setting up canvas*/  
-    var margin = radius*5;  
-
+    var margin = radius*10;  
+    // var width = window.innerWidth-margin;
+    // var height = window.innerHeight-margin;
     var width = window.outerWidth;
     var height = window.innerHeight-margin;
 
@@ -55,6 +59,11 @@ async function drawData() {
     vis = svg
         .append('svg:g')
         .attr("transform","translate("+ 0 + "," + 0 + ")");  
+        // .attr("transform","translate("+ margin/2 + "," + margin/2 + ")");  
+
+    // var key = svg //for the visualization
+    //     .append('svg:g')
+    //     .attr("transform", "translate(" + 0 + "," + 0 + ")");
 
 /*step 3: data processing, parsing, counting, creating relationships among the data pieces*/    
 /*probably don't need these*/
@@ -163,57 +172,145 @@ async function drawData() {
 	                if (keywords[i].indexOf(uniqueMostKeyed[j])!=-1){ //if a keyword in the dataset is the same as one of the unique keywords
                         for (k=0; k<theseKeywords.length; k++){
                             if (theseKeywords[k].indexOf(uniqueMostKeyed[j])!=-1){  
-                                // if(keywords[i].length==1){
-                                //     console.log(keywords[i][0]+" "+totalKeywords[k])
-                                //     links.push({"source":keywords[i][0],"target":uniqueMostKeyed[j],"title":dataset[i].title, "weight":totalKeywords[k], "journal":dataset[i].journal})  
-                                // }
-                                if(keywords[i].length>1){
-                                    links.push({"source":keywords[i],"target":uniqueMostKeyed[j],"title":dataset[i].title, "weight":totalKeywords[k], "journal":dataset[i].journal})  
-                                }
+                                links.push({"source":keywords[i],"target":uniqueMostKeyed[j],"title":dataset[i].title, "weight":totalKeywords[k], "journal":dataset[i].journal})  
                             }
                         }
 	                }
 	            }
 	        }
-
 	        makeLinks();
 	    }
 	}
 
+    // moreLinks();
+    // function moreLinks(){
+    //     moreLinks = [];
+    //     if(itsDone==false){ //probably delete this check
+    //         for (i=0; i<dataset.length; i++){ //for the whole dataset
+    //             for (j=0; j<uniqueMostKeyed.length; j++){ //and the unique keywords
+    //                 if (keywords[i].indexOf(uniqueMostKeyed[j])!=-1){ //if a keyword in the dataset is the same as one of the unique keywords
+    //                     for (k=0; k<theseKeywords.length; k++){
+    //                         if (theseKeywords[k].indexOf(uniqueMostKeyed[j])!=-1){  
+    //                             moreLinks.push({"source":uniqueMostKeyed[j],"target": dataset[i].journal})  
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         makemoreLinks();
+    //     }
+    // }
+    // function makemoreLinks(){
+    //     moreLinks.forEach(function(link) {
+    //       link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
+    //       link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
+    //     });
+    //     moresimpleNodes();
+    // }
+
+
+
+    // function moresimpleNodes(){
+    //     // console.log(moreLinks);
+    //    simulation = d3.forceSimulation()
+    //         .nodes(d3.values(nodes))
+    //         .force("link", d3.forceLink(moreLinks))
+    //         .force("charge", d3.forceManyBody().strength(-10))
+    //         .force("collide", d3.forceCollide().radius(radius*5))
+    //         .force("center", d3.forceCenter(width / 2, height / 2))
+    //         .on("tick", ticked)
+
+
+    //     pathb = vis.selectAll("pathb")
+    //         .data(moreLinks)
+    //         .enter().append("path")
+    //         .attr("fill","none")
+    //         .attr("stroke", "grey")
+    //         .attr("stroke-width",.1)
+
+    //     circleb = vis.selectAll("nodeb")
+    //         .data(simulation.nodes())
+    //         .enter().append("circle")
+
+    //     circleb
+    //         .attr("r", 10)
+    //         .attr("fill", function(d,i){
+    //             return colorScalez(d.journal);
+    //         })
+    //         .attr("opacity", .2)
+    //         .on("mouseover", function(d,i) {
+    //             var xPosition = d3.select(this).node().transform.baseVal[0].matrix.e + radius/2;
+    //             var yPosition = d3.select(this).node().transform.baseVal[0].matrix.f + radius/2;;
+
+    //             d3.select("#tooltip")
+    //                 .style("left", xPosition + "px")
+    //                 .style("top", yPosition + "px")                     
+    //                 .select("#value")
+    //                 .text(function(){
+    //                     return d.journal;
+    //                 });
+    //             //show the tooltip
+    //             d3.select("#tooltip").classed("hidden", false);
+    //         })
+    //         .on("mouseout", function() {
+    //             //hide the tooltip
+    //             d3.select("#tooltip").classed("hidden", true); 
+    //         })
+
+    //     function ticked() {
+    //       pathb.attr("d", linkArc);
+    //       circleb.attr("transform", transform);
+    //     }
+    //     function transform(d) {
+    //       d.x = Math.max(radius, Math.min(width - radius, d.x));
+    //       d.y = Math.max(radius, Math.min(height - radius, d.y));   
+    //       return "translate(" + d.x+ "," + d.y + ")";
+    //     }
+    //     function linkArc(d) {
+    //       var dx = d.target.x - d.source.x,
+    //           dy = d.target.y - d.source.y,
+    //           dr = Math.sqrt(dx * dx + dy * dy);
+    //       return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+    //     }
+    // }
+
+
+
+
+
 
     function makeLinks(){
-        // console.log(links);
         links.forEach(function(link) {
-          // link.source = (nodes[link.source] = {name: link.source, title:link.title, journal:link.journal});
-          // link.target = (nodes[link.target] = {name: link.target, weight:link.weight, journal:link.journal});
-
           link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, title:link.title, journal:link.journal});
           link.target = nodes[link.target] || (nodes[link.target] = {name: link.target, weight:link.weight, journal:link.journal});
         });
-        makeNodes();
-    }
-    function makeNodes(){
+    //     simpleNodes();
+    // }
+
+    // function simpleNodes(){
         var thisWeight = [];
         var maxWeight;
 
         simulation = d3.forceSimulation()
             .nodes(d3.values(nodes))
             .force("link", d3.forceLink(links))
-    .force("charge", d3.forceManyBody())
-    // .force("center", d3.forceCenter(width / 2, height / 2))
-            // .force("charge", d3.forceManyBody().strength(-10))
+            .force("charge", d3.forceManyBody().strength(-10))
             // .force("collide", d3.forceCollide().radius(radius))
-            // .force("center", d3.forceCenter(width / 2, height / 2))
-            .on("tick", ticked)    
-        // restart();
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .on("tick", ticked)
 
 
         path = vis.selectAll("path")
             .data(links)
             .enter().append("path")
             .attr("fill", "none")
+            // .attr("opacity", .2)
             .attr("stroke", "grey")
             .attr("stroke-width",.2)
+            // .attr("class", function(d){
+                // return d.weight;
+                // return d.title;
+            // })
 
         circle = vis.selectAll("node")
             .data(simulation.nodes())
@@ -235,14 +332,21 @@ async function drawData() {
                 if(howLong[i][0].length>1){
                   return radius;  
                 }
-                    // return radius;
+                    return radius;
             })
             .attr("fill", function(d,i){
                 if(howLong.length>0){
                     if(howLong[i][0].length==1){
                         thisCount += 1;
                         return "white";
-                    }                       
+                    }        
+                    // if(howLong[i].length==1){ //PROBLEM WITH NODE COMPOSITION, HAS TO DO WITH THE WEIGHT ENTITY AS WELL
+                        //SINGLE AUTHORS SHOULD BE TREATED THE SAME AS MULTIPLE AUTHORS IN THE MAKING LINKS PART
+                        
+
+                    //     thisCount += 1;
+                    //     return "white";
+                    // }                 
                     if(howLong[i].length>1){ //&&howLong[i][0].length>1
                         return colorScalez(d.journal)
                     } 
@@ -282,49 +386,16 @@ async function drawData() {
             .on("mouseout", function() {
                 //hide the tooltip
                 d3.select("#tooltip").classed("hidden", true); 
-            })      
-    .call(d3.drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended))
-    .on('dblclick',releasenode)
+            })
 
-        function dblclick(d) {
-            d3.select(this).classed("fixed", d.fixed = false);
-        }
-        function dragstarted(d) {
-          if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-          d.fx = d.x;
-          d.fy = d.y;
-        } 
-     
-        function dragged(d) {
-          d.fx = d3.event.x;
-          d.fy = d3.event.y;
-        }
-
-        function dragended(d) {
-          if (!d3.event.active) simulation.alphaTarget(0);
-          //d.fx = null;
-          //d.fy = null;
-        }
-
-        function releasenode(d) {
-            d.fx = null;
-            d.fy = null;
-        }
-        // function dragstart(d) {
-        //     d3.select(this).classed("fixed", d.fixed = true);
-        // }
 
         function ticked() {
           path.attr("d", linkArc);
-          circle.attr("transform", transform)
+          circle.attr("transform", transform);
         }
 
         var blah = 0;
         var angle = 0; 
-
         function transform(d) {
             var thisOne = d;
             //NEED TO GET RADIUSES ACCORDING TO MAPPED RADIUS
@@ -332,8 +403,8 @@ async function drawData() {
                 // console.log(thisOne);
                 blah++;
                 angle = (blah / (thisCount/2)) * Math.PI; // Calculate the angle at which the element will be placed.
-                d.x = (280 * Math.cos(angle)) + (width/2); // Calculate the x position of the element.
-                d.y = (240 * Math.sin(angle)) + (width/3.5);
+                d.x = (240 * Math.cos(angle)) + (width/2); // Calculate the x position of the element.
+                d.y = (200 * Math.sin(angle)) + (width/3);
                 return "translate(" + d.x + "," + d.y + ")";    
                 
             }
@@ -343,6 +414,7 @@ async function drawData() {
                 return "translate(" + d.x + "," + d.y + ")";            
             }
         }
+
         function linkArc(d) {
           var dx = d.target.x - d.source.x,
               dy = d.target.y - d.source.y,
