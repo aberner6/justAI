@@ -37,7 +37,7 @@ var drag;
 var dataset;
 async function drawData() {
 /*step 1: get the data and see one piece of it*/	
-	dataset = await d3.csv("./data/justAIAB.csv");
+	dataset = await d3.csv("./data/justiceKeyword.csv");
 	const accessOnePiece = dataset[0];
 	// console.log(dataset);
 

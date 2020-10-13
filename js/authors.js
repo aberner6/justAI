@@ -3,7 +3,8 @@
 
 //Datavis
 //number of keywords 0-1, 0 will give a lot of keywords
-var filterNum = .3;
+var filterNum = 0;
+var totalKeysDone = false;
 
 var thisCount = 0;
 var personCount=0;
@@ -166,7 +167,7 @@ svg = d3.select("#container")
 
 var vis = svg //for the visualization
     .append('svg:g')
-    .attr("transform", "translate(" + 100 + "," + 0 + ")");
+    .attr("transform", "translate(" + 0 + "," + 0 + ")");
 
 var key = svg //for the visualization
     .append('svg:g')
@@ -249,19 +250,21 @@ $(document).ready(function() {
     // francesca's
     // $.getJSON("https://spreadsheets.google.com/feeds/list/13rLQwhFZMFkNt3PcmMg3E-1lANxRaaR74lBUmer22dU/od6/public/values?alt=json", function(datoo) {
 
-    //august 20
-    $.getJSON("https://spreadsheets.google.com/feeds/list/1pqPoc6yiQzVPLs9bZXlgKvchFk5AjRNKqoRNSG5C3Uo/od6/public/values?alt=json", function(datoo) {
+    //august 20, 2020
+    // $.getJSON("https://spreadsheets.google.com/feeds/list/1pqPoc6yiQzVPLs9bZXlgKvchFk5AjRNKqoRNSG5C3Uo/od6/public/values?alt=json", function(datoo) {
+    //justice keyword
+    $.getJSON("https://spreadsheets.google.com/feeds/list/1rdK2A_sO1Y3KtaKUIWgXINl21u5BBhLkQuKRa2pccoE/od6/public/values?alt=json", function(datoo) {
+
         var entry = datoo.feed.entry;
-        // console.log(entry);
+        console.log(entry);
         console.log("in here get json")
         console.log(entry.length);
         for (i = 0; i < entry.length; i++) {
             dataG.push({
-                "author": entry[i]['gsx$author']['$t'],
-                "keywords": entry[i]['gsx$keywords']['$t'],
-                "link": entry[i]['gsx$link']['$t'],
-                "medium": entry[i]['gsx$medium']['$t'],
-                "title": entry[i]['gsx$title']['$t'],
+                "author": entry[i]['gsx$authors']['$t'],
+                "keywords": entry[i]['gsx$authorkeywords']['$t'],
+                "medium": entry[i]['gsx$journal']['$t'],
+                "title": entry[i]['gsx$label']['$t'],
             })
         }
         loadData(dataG, filterNum);
@@ -387,7 +390,21 @@ function loadData(dataName, filterNum) {
 
     colorScalez = d3.scale.ordinal()
         .domain(uniqueTypes)
-        .range(["red","green","blue"]);
+        .range(["#007dd2",
+"#bc2c00",
+"#7157df",
+"#00b44c",
+"#d40495",
+"#00bb8c",
+"#ff85af",
+"#3e6e00",
+"#eab1ff",
+"#bb7600",
+"#833570",
+"#f7bc5a",
+"#007357",
+"#ff876f",
+"#91341c"])
 
 var paperLabel = key.selectAll("keylabel")
     .data(uniqueTypes)
@@ -425,14 +442,26 @@ uniqueAuthors = theseAuthors.filter(onlyUnique); //finds unique keywords
         console.log("keywordSorted")
         for (i = 0; i < theseKeywords.length; i++) {
             totalKeywords[i] = keyConsolidation(theseKeywords[i])
+            totalKeysDone = true;
+        }
+        if(totalKeysDone==true){
+            console.log(totalKeywords)
             mostKeyed = d3.max(totalKeywords);
-            if (totalKeywords[i] > mostKeyed * filterNum) {
-                focusKeywords.push(theseKeywords[i]);
-            } else {
-                // console.log("nope")
+
+        }
+        if(totalKeywords.length==theseKeywords.length && mostKeyed>0){
+            for (i = 0; i < theseKeywords.length; i++) {
+                if (totalKeywords[i] > mostKeyed * filterNum) {
+                    focusKeywords.push(theseKeywords[i]);
+                    console.log(theseKeywords[i])
+                } else {
+                    console.log("nope")
+                }
             }
         }
-    }
+        
+        }
+    
 
     uniqueMostKeyed = focusKeywords.filter(onlyUnique); //finds unique keywords from focused
     keyTypes = keyTypes.sort(); // alphabetical order
@@ -506,11 +535,8 @@ function createNodes() {
                         "target": uniqueMostKeyed[j],
                         "title": thisData[i].title,
                         "author": thisData[i].author,
-                        "medium": thisData[i].medium,
-                        "url": thisData[i].link
+                        "medium": thisData[i].medium
                     })
-                    // links.push({"source":keywords[i],"target":uniqueMostKeyed[j],"typeResearch": thisData[i].typeResearch, "sourceVal":thisData[i].sourceVal.toLowerCase(), "headline":thisData[i].title, "authors":thisData[i].author, "url":thisData[i].link})
-
                 }
             }
         }
@@ -532,36 +558,43 @@ function simpleNodes() {
     var maxWeight;
 
     // Compute the distinct nodes from the links.
-
     links.forEach(function(link) {
-
-
-
         link.source = nodes[link.source] || (nodes[link.source] = {
             name: link.source,
-            medium: link.medium,
-            url: link.url,
             headline: link.title,
-            author: link.author
+            authors: link.author,
+            medium: link.medium
         });
-
-
         link.target = nodes[link.target] || (nodes[link.target] = {
-            name: link.target,
-            medium: link.medium,
-            url: link.url,
-            headline: link.title,
-            author: link.author
+            name: link.target
         });
-
     });
+    // links.forEach(function(link) {
+    //     console.log(link);
+
+
+    //     link.source = (nodes[link.source] = {
+    //         name: link.source,
+    //         medium: link.medium,
+    //         headline: link.title,
+    //         author: link.author
+    //     });
+
+
+    //     link.target =  (nodes[link.target] = {
+    //         name: link.target,
+    //         medium: link.medium,
+    //         headline: link.title,
+    //         author: link.author
+    //     });
+    // });
 
     force = d3.layout.force()
         .nodes(d3.values(nodes))
         .links(links)
         .size([w, h-100])
-        .linkDistance(80)
-        .charge(-800)
+        // .linkDistance(80)
+        .charge(-200)
         .on("tick", tick)
         .start();
 
@@ -607,12 +640,6 @@ function simpleNodes() {
                 thisCount +=1;
                 return "white";
             }
-            if(d.medium=="Author"){
-                personCount+=1;
-            }
-            if(d.medium=="Organization"){
-                fundingCount+=1;
-            }
             return colorScalez(d.medium)
         })
         .attr("stroke", function(d, i) {
@@ -623,15 +650,6 @@ function simpleNodes() {
         })
         .attr("opacity", .8)
         .on("dblclick", dblclick)
-        .on("click", function(d) {
-            if (d.name[0].length == 1) {
-                //do nothing
-                console.log("nada")
-            } else {
-                var thisLink = d.url;
-                var win = window.open(thisLink, '_blank');
-            }
-        })
         .call(drag);
 
     circle
@@ -644,11 +662,15 @@ function simpleNodes() {
             }
             return radius;
         })
-circle.on("mouseover",function(d){ 
-    var b = d.name; 
-    for(i=0; i<b.length; i++){ 
-        for(j=0; j<path[0].length; j++){ if(b[i] == path[0][j].__data__.target.name){ console.log(b[i] + " " + path[0][j].__data__.target.name); d3.select(path[0][j]).transition().attr("stroke-width",3) } } } })
-circle.on("mouseout",function(d){ var b = d.name; for(i=0; i<b.length; i++){ for(j=0; j<path[0].length; j++){ if(b[i] == path[0][j].__data__.target.name){ console.log(b[i] + " " + path[0][j].__data__.target.name); d3.select(path[0][j]).transition().attr("stroke-width",.3) } } } })
+    circle.on("mouseover",function(d){ 
+         var b = d.name; 
+            for(i=0; i<b.length; i++){ 
+            for(j=0; j<path[0].length; j++){ if(b[i] == path[0][j].__data__.target.name){ 
+                console.log(b[i] + " " + path[0][j].__data__.target.name); 
+                d3.select(path[0][j]).transition().attr("stroke-width",3) 
+            } } } 
+        })
+    circle.on("mouseout",function(d){ var b = d.name; for(i=0; i<b.length; i++){ for(j=0; j<path[0].length; j++){ if(b[i] == path[0][j].__data__.target.name){ console.log(b[i] + " " + path[0][j].__data__.target.name); d3.select(path[0][j]).transition().attr("stroke-width",.3) } } } })
 
 
     function dblclick(d) {
@@ -671,8 +693,8 @@ circle.on("mouseout",function(d){ var b = d.name; for(i=0; i<b.length; i++){ for
         .text(function(d, i) {
             if (howLong.length > 1) { //only major keywords
                 // console.log(d.name);
-                if (d.medium=="Author") {
-                    return d.headline;
+                if (d.medium=="author") {
+                    return d.title;
                 }                
                 if (howLong[i][0].length == 1) {
                     return d.name;
@@ -680,73 +702,7 @@ circle.on("mouseout",function(d){ var b = d.name; for(i=0; i<b.length; i++){ for
             }
         });
 
-    $(".labels").show();
-    // Use elliptical arc path segments to doubly-encode directionality.
-    function tick() {
-        path.attr("d", linkArc);
-
-        circle
-            .attr("transform", transform);
-
-        text.attr("transform", transform);
-
-        // images.attr("transform", transform);
-
-    }
-
-
-    var angle = 0; 
-    var blah = 0;
-    var people = 0;
-    var funding = 0;
-    function transform(d) {
-        // console.log(d);
-        var thisOne = d;
-        // console.log(thisOne.medium);
-        // console.log(thisOne.name[0].length)
-            // if (howLong.length > 1) { //only major keywords
-            //     // console.log(d.name);
-                if (thisOne.name[0].length == 1) {
-                    blah++;
-                    angle = (blah / (thisCount/2)) * Math.PI; // Calculate the angle at which the element will be placed.
-                                                        // For a semicircle, we would use (i / numNodes) * Math.PI.
-                    d.x = (240 * Math.cos(angle)) + (w/2); // Calculate the x position of the element.
-                    d.y = (200 * Math.sin(angle)) + (w/3);
-                    return "translate(" + d.x + "," + d.y + ")";    
-                    
-                }
-// 400 300
-                if (thisOne.medium == "Author") {
-                    console.log(thisOne);
-                    people++;
-                    angle = (people / (personCount/2)) * Math.PI; // Calculate the angle at which the element will be placed.
-                                                        // For a semicircle, we would use (i / numNodes) * Math.PI.
-                    d.x = (500 * Math.cos(angle)) + (w/2); // Calculate the x position of the element.
-                    d.y = (360 * Math.sin(angle)) + (w/3);
-                    return "translate(" + d.x + "," + d.y + ")";    
-                    
-                }
-
-
-                if (thisOne.medium == "Organization") {
-                    console.log(thisOne);
-                    funding++;
-                    angle = (funding / (fundingCount/2)) * Math.PI; // Calculate the angle at which the element will be placed.
-                                                        // For a semicircle, we would use (i / numNodes) * Math.PI.
-                    d.x = (400 * Math.cos(angle)) + (w/2); // Calculate the x position of the element.
-                    d.y = (300 * Math.sin(angle)) + (w/3);
-                    return "translate(" + d.x + "," + d.y + ")";    
-                    
-                }
-
-                else{
-                    // console.log(thisOne);
-                    d.x = Math.max(radius, Math.min(w - radius, d.x));
-                    d.y = Math.max(radius, Math.min(h - radius, d.y));
-                    return "translate(" + d.x + "," + d.y + ")";
-                }
-    }
-
+    // $(".labels").show();
     $('circle').tipsy({
         gravity: 'w',
         html: true,
@@ -756,7 +712,7 @@ circle.on("mouseout",function(d){ var b = d.name; for(i=0; i<b.length; i++){ for
             var d = this.__data__;
             console.log(d);
             if (d.name[0].length == 1) {
-                return "Major Keyword: " + d.name;
+                return "Keyword: " + d.name;
             } else {
                 return "Title:" + '<br>' + d.headline + '<br>' + '<br>' + "Keywords:" + '<br>' + d.name;
             }
@@ -769,93 +725,26 @@ circle.on("mouseout",function(d){ var b = d.name; for(i=0; i<b.length; i++){ for
     d3.select("#citeRate").classed("selected", true);
 }
 
-
-function stopBigNet() {
-    force.stop()
+function tick() {
+    path.attr("d", linkArc);
     circle
-        .transition()
-        .duration(2000)
-        .attr("transform", newTransform);
-    path
-        .transition()
-        .duration(2000)
-        .attr("d", linkArc);
+        .attr("transform", transform);
+    text.attr("transform", transform);
 
-    function newTransform(d, i) {
-        d.y = h; //not links[i].cites
-        return "translate(" + d.x + "," + d.y + ")";
-    }
 }
-// function linkArc(d) {
-//     var dx = d.target.x - d.source.x,
-//     dy = d.target.y - d.source.y,
-//     dr = Math.sqrt(dx * dx + dy * dy);
-//     return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y; 
-// }
 
-
-var angle = 0; 
-var blah = 0;
-var people = 0;
-var funding = 0;
-function transform(d) {
-    // console.log(d);
-    var thisOne = d;
-    // console.log(thisOne.name[0].length)
-        // if (howLong.length > 1) { //only major keywords
-        //     // console.log(d.name);
-            if (thisOne.name[0].length == 1) {
-                blah++;
-                angle = (blah / (thisCount/2)) * Math.PI; // Calculate the angle at which the element will be placed.
-                                                    // For a semicircle, we would use (i / numNodes) * Math.PI.
-                d.x = (240 * Math.cos(angle)) + (w/2); // Calculate the x position of the element.
-                d.y = (200 * Math.sin(angle)) + (w/3);
-                return "translate(" + d.x + "," + d.y + ")";    
-                
-            }
-// 400 300
-            if (thisOne.medium == "author") {
-                console.log(thisOne);
-                people++;
-                angle = (people / (personCount/2)) * Math.PI; // Calculate the angle at which the element will be placed.
-                                                    // For a semicircle, we would use (i / numNodes) * Math.PI.
-                d.x = (500 * Math.cos(angle)) + (w/2); // Calculate the x position of the element.
-                d.y = (360 * Math.sin(angle)) + (w/3);
-                return "translate(" + d.x + "," + d.y + ")";    
-                
-            }
-
-
-            if (thisOne.medium == "organization") {
-                console.log(thisOne);
-                funding++;
-                angle = (funding / (fundingCount/2)) * Math.PI; // Calculate the angle at which the element will be placed.
-                                                    // For a semicircle, we would use (i / numNodes) * Math.PI.
-                d.x = (400 * Math.cos(angle)) + (w/2); // Calculate the x position of the element.
-                d.y = (300 * Math.sin(angle)) + (w/3);
-                return "translate(" + d.x + "," + d.y + ")";    
-                
-            }
-
-            else{
-                console.log(thisOne);
-                d.x = Math.max(radius, Math.min(w - radius, d.x));
-                d.y = Math.max(radius, Math.min(h - radius, d.y));
-                return "translate(" + d.x + "," + d.y + ")";
-            }
-}
 function linkArc(d) {
-    // var thisOne = d;
-    // if (thisOne.name[0].length == 1) {
-    // }
-    // if (thisOne.medium == "person") {
-    // }
-    // else{
-        var dx = d.target.x - d.source.x,
+    var dx = d.target.x - d.source.x,
         dy = d.target.y - d.source.y,
         dr = Math.sqrt(dx * dx + dy * dy);
-        return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y; 
-    // }
+    return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+}
+
+
+function transform(d) {
+    d.x = Math.max(radius, Math.min(w - radius, d.x));
+    d.y = Math.max(radius, Math.min(h - radius, d.y));
+    return "translate(" + d.x + "," + d.y + ")";
 }
 
 
