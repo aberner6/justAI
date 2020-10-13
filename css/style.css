@@ -1,6 +1,9 @@
+body{
+  background-color:black;
+}
 .link{
-  fill: none;
-  opacity:1;
+  /*fill: none;*/
+  /*opacity:1;*/
   stroke-width: .3px;
 }
 .klink {

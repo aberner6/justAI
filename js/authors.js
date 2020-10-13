@@ -609,7 +609,12 @@ function simpleNodes() {
             // console.log(d.medium)
             return colorScalez(d.medium);
         })
-        .attr("opacity",1)
+        .attr("fill", function(d, i) {
+            // console.log(d.medium)
+            return colorScalez(d.medium);
+        })
+        .attr("stroke-opacity",1)
+        .attr("opacity",.2)
         .attr("stroke-width",.3)
         .on("mouseover", function(d){
             console.log(d);
@@ -638,13 +643,13 @@ function simpleNodes() {
         .attr("fill", function(d, i) {
             if (howLong[i][0].length == 1) {
                 thisCount +=1;
-                return "white";
+                return "none";
             }
             return colorScalez(d.medium)
         })
         .attr("stroke", function(d, i) {
             if (howLong[i][0].length == 1) {
-                return greyColor;
+                return "white";
             }
             return "none";
         })
