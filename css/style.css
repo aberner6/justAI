@@ -43,6 +43,7 @@ body{
   font-size: 10px;
   text-transform:lowercase;
   display:none;
+  color:white;
 }
 .kandellabels{
   font-size: 10px;
@@ -53,16 +54,14 @@ body{
 }
 .button {
   padding:4px;
-  background-color: white;
-  border: solid 1px lightgray;
+  background-color: black;
+  border: solid .1px lightgray;
   cursor: pointer;
   position: fixed;
   font-family: Helvetica Neue;
-  font-size: 12px;
+  font-size: 8px;
   text-align: center;
-  font-weight: 200;
-  background-color: white;
-  color: #666;
+  color: white;
 }
 .button:hover{
   color: white;

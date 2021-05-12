@@ -253,7 +253,8 @@ $(document).ready(function() {
     //august 20, 2020
     // $.getJSON("https://spreadsheets.google.com/feeds/list/1pqPoc6yiQzVPLs9bZXlgKvchFk5AjRNKqoRNSG5C3Uo/od6/public/values?alt=json", function(datoo) {
     //justice keyword
-    $.getJSON("https://spreadsheets.google.com/feeds/list/1rdK2A_sO1Y3KtaKUIWgXINl21u5BBhLkQuKRa2pccoE/od6/public/values?alt=json", function(datoo) {
+    // $.getJSON("https://spreadsheets.google.com/feeds/list/1rdK2A_sO1Y3KtaKUIWgXINl21u5BBhLkQuKRa2pccoE/od6/public/values?alt=json", function(datoo) {
+    $.getJSON("https://www.notion.so/4ff7636ef23c40ddb9e6bda180fe44a9?v=25b17617cf14405597ceea4394daf495", function(datoo) {
 
         var entry = datoo.feed.entry;
         console.log(entry);
